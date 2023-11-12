@@ -21,7 +21,7 @@ class CreatFileCsvHandler{
     public function __invoke(CreatFileCsv $CreatFileCsv)
     { 
 
-        $path = __DIR__ . '/../../history/history_' . $CreatFileCsv->getNameWallet() . '.csv';;
+        $path = __DIR__ . '/../../history/history_' . $CreatFileCsv->getNameWallet() . '.csv';
 
         // Open file to save
         $handle = fopen($path, 'w+');

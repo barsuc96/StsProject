@@ -29,14 +29,14 @@ class GetWalletHistoryCommand extends Command
         $this->messageBus = $messageBus;
         parent::__construct();
     }
-    //protected static $defaultName = 'app:get-ean-command';
     protected function configure(): void
     {
         $this
             ->setDescription('Good morning!')
             ->addArgument('walletId', InputArgument::REQUIRED, "Id portfela");
     }
-    protected function execute(InputInterface $input, OutputInterface $output){
+    protected function execute(InputInterface $input, OutputInterface $output): int
+    {
         $io = new SymfonyStyle($input, $output);
         $walletId = $input->getArgument('walletId');
         $result = $this->getWalletHistory($walletId);
@@ -51,7 +51,7 @@ class GetWalletHistoryCommand extends Command
         $wallet = $this->doctrine->getRepository(Wallet::class)->findOneBy(array("id" => $walletId));
         $histories = $wallet->getHistories()->toArray();
         }catch(\Exception $e) {
-            echo $e;
+            return $e->getMessage(); 
             }
         $dataToCsv = [];
         $dataToCsv[] = ['Portfel', 'Data', 'Akcja'];
@@ -61,10 +61,7 @@ class GetWalletHistoryCommand extends Command
                 $dataToCsv[] = [$wallet->getName(), $historie->getDate()->format('Y-m-d H:i:s'), $historie->getAction()];   
             }
             $message = new CreatFileCsv($dataToCsv, $wallet->getName() );
-            $this->messageBus->dispatch($message);
-       
-
-           
+            $this->messageBus->dispatch($message);    
     }
 }
 ?>
