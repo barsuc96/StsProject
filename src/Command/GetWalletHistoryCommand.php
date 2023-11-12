@@ -14,6 +14,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use App\Entity\Wallet;
 use App\Message\CreatFileCsv;
+use Exception;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 #[AsCommand(
@@ -39,17 +40,23 @@ class GetWalletHistoryCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
         $walletId = $input->getArgument('walletId');
-        $result = $this->getWalletHistory($walletId);
 
-        
-        $io->success(json_encode($result));
-
+        try {
+            $result = $this->getWalletHistory($walletId);
+            $io->success(json_encode($result));
+        } catch (\Exception $e) {
+            $io->error($e->getMessage());
+            return 1; 
+        }
         return 0;
     }
     private function getWalletHistory($walletId){
         try{
         $wallet = $this->doctrine->getRepository(Wallet::class)->findOneBy(array("id" => $walletId));
-        $histories = $wallet->getHistories()->toArray();
+        if(empty($wallet) or empty($histories = $wallet->getHistories()->toArray()))
+        {
+            throw new Exception("Brak danych do wydrukowania");
+        }
         }catch(\Exception $e) {
             return $e->getMessage(); 
             }
@@ -61,7 +68,8 @@ class GetWalletHistoryCommand extends Command
                 $dataToCsv[] = [$wallet->getName(), $historie->getDate()->format('Y-m-d H:i:s'), $historie->getAction()];   
             }
             $message = new CreatFileCsv($dataToCsv, $wallet->getName() );
-            $this->messageBus->dispatch($message);    
+            $this->messageBus->dispatch($message); 
+            return 1;   
     }
 }
 ?>

@@ -13,10 +13,14 @@ class GenerateCsvCommandTest extends KernelTestCase
     private $messageBus;
     public function __construct()
     {
-        $this->doctrine = $this->createMock(ManagerRegistry::class);
-        $this->messageBus = $this->createMock(MessageBusInterface::class);
+        // $this->doctrine = $this->createMock(ManagerRegistry::class);
+        // $this->messageBus = $this->createMock(MessageBusInterface::class);
  
         parent::__construct();
+    }
+    protected function setUp(): void
+    {
+        self::bootKernel();
     }
     public function testExecute()
     { 
@@ -25,8 +29,7 @@ class GenerateCsvCommandTest extends KernelTestCase
 
         $command = $application->find('app:get-wallet-history');
         $commandTester = new CommandTester($command);
-        $commandTester->execute(['walletId' => 6]);
-
-        $this->assertFileExists(__DIR__ . '/..//../history/history_Bartosz.csv');
+        $commandTester->execute(['walletId' => 1]);
+        $this->assertFileExists(__DIR__ . '/../../history/history_test.csv');
     }
 }
